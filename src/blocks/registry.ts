@@ -10,6 +10,12 @@ import { CountdownBonusBlock as CountdownBonusComponent, CountdownBonusEditor, c
 import { ModalPopupBlock as ModalPopupComponent, ModalPopupEditor, modalPopupDefinition, createModalPopupBlock } from './prelanding/ModalPopup'
 import { QuizSurveyBlock as QuizSurveyComponent, QuizSurveyEditor, quizSurveyDefinition, createQuizSurveyBlock } from './prelanding/QuizSurvey'
 import { WheelOfFortuneBlock as WheelOfFortuneComponent, WheelOfFortuneEditor, wheelOfFortuneDefinition, createWheelOfFortuneBlock } from './prelanding/WheelOfFortune'
+import { HeroBannerBlock as HeroBannerComponent, HeroBannerEditor, heroBannerDefinition, createHeroBannerBlock } from './prelanding/HeroBanner'
+import { CasinoVitrineBlock as CasinoVitrineComponent, CasinoVitrineEditor, casinoVitrineDefinition, createCasinoVitrineBlock } from './prelanding/CasinoVitrine'
+import { GameGridBlock as GameGridComponent, GameGridEditor, gameGridDefinition, createGameGridBlock } from './prelanding/GameGrid'
+import { AgeGateBlock as AgeGateComponent, AgeGateEditor, ageGateDefinition, createAgeGateBlock } from './prelanding/AgeGate'
+import { AdvantagesBarBlock as AdvantagesBarComponent, AdvantagesBarEditor, advantagesBarDefinition, createAdvantagesBarBlock } from './prelanding/AdvantagesBar'
+import { TopBarBlock as TopBarComponent, TopBarEditor, topBarDefinition, createTopBarBlock } from './prelanding/TopBar'
 
 // White blocks
 import { ArticleHeaderBlock as ArticleHeaderComponent, ArticleHeaderEditor, articleHeaderDefinition, createArticleHeaderBlock } from './white/ArticleHeader'
@@ -61,6 +67,48 @@ registry.set('wheel-of-fortune', {
   component: WheelOfFortuneComponent,
   editor: WheelOfFortuneEditor,
   defaultBlock: createWheelOfFortuneBlock,
+})
+
+registry.set('hero-banner', {
+  definition: heroBannerDefinition,
+  component: HeroBannerComponent,
+  editor: HeroBannerEditor,
+  defaultBlock: createHeroBannerBlock,
+})
+
+registry.set('casino-vitrine', {
+  definition: casinoVitrineDefinition,
+  component: CasinoVitrineComponent,
+  editor: CasinoVitrineEditor,
+  defaultBlock: createCasinoVitrineBlock,
+})
+
+registry.set('game-grid', {
+  definition: gameGridDefinition,
+  component: GameGridComponent,
+  editor: GameGridEditor,
+  defaultBlock: createGameGridBlock,
+})
+
+registry.set('age-gate', {
+  definition: ageGateDefinition,
+  component: AgeGateComponent,
+  editor: AgeGateEditor,
+  defaultBlock: createAgeGateBlock,
+})
+
+registry.set('advantages-bar', {
+  definition: advantagesBarDefinition,
+  component: AdvantagesBarComponent,
+  editor: AdvantagesBarEditor,
+  defaultBlock: createAdvantagesBarBlock,
+})
+
+registry.set('top-bar', {
+  definition: topBarDefinition,
+  component: TopBarComponent,
+  editor: TopBarEditor,
+  defaultBlock: createTopBarBlock,
 })
 
 // Register white blocks

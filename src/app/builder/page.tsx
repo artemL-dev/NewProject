@@ -101,7 +101,7 @@ export default function BuilderSelectPage() {
 
         <div className="text-center mt-8">
           <Link href="/" className="text-gray-500 hover:text-gray-700 text-sm">
-            ← Back to Dashboard
+            ← Back to Landify
           </Link>
         </div>
       </div>

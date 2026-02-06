@@ -6,6 +6,7 @@ export interface Project {
   name: string
   description: string | null
   color: string
+  teamId?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -14,6 +15,7 @@ export interface CreateProjectInput {
   name: string
   description?: string
   color?: string
+  teamId?: string | null
 }
 
 function transformDbToProject(record: any): Project {
@@ -23,6 +25,7 @@ function transformDbToProject(record: any): Project {
     name: record.name,
     description: record.description,
     color: record.color,
+    teamId: record.team_id || null,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
   }
@@ -52,6 +55,7 @@ export const projectService = {
         name: input.name,
         description: input.description || null,
         color: input.color || '#6366f1',
+        team_id: input.teamId || null,
       } as any)
       .select()
       .single()
@@ -82,5 +86,17 @@ export const projectService = {
     const supabase = createClient()
     const { error } = await supabase.from('projects').delete().eq('id', id)
     if (error) throw error
+  },
+
+  async getTeamProjects(teamId: string): Promise<Project[]> {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('team_id', teamId)
+      .order('updated_at', { ascending: false })
+
+    if (error) throw error
+    return (data || []).map(transformDbToProject)
   },
 }

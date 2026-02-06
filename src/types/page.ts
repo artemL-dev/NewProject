@@ -22,6 +22,9 @@ export interface PageSettings {
   customCss?: string
   customJs?: string
 
+  // UTM
+  forwardUtmParams?: boolean
+
   // Tracking
   googleAnalyticsId?: string
   facebookPixelId?: string
@@ -49,6 +52,7 @@ export interface Page {
   isPublished: boolean
   publishedAt: string | null
   projectId?: string | null
+  teamId?: string | null
   createdAt: string
   updatedAt: string
 }

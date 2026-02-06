@@ -10,11 +10,14 @@ export type ModalType =
   | 'deleteConfirm'
   | null
 
+export type LeftSidebarTab = 'blocks' | 'pageSettings'
+
 export interface UIState {
   leftSidebarOpen: boolean
   rightSidebarOpen: boolean
   leftSidebarWidth: number
   rightSidebarWidth: number
+  leftSidebarTab: LeftSidebarTab
   devicePreview: DevicePreview
   canvasZoom: number
   isDragging: boolean
@@ -32,6 +35,7 @@ const initialState: UIState = {
   rightSidebarOpen: true,
   leftSidebarWidth: 280,
   rightSidebarWidth: 320,
+  leftSidebarTab: 'blocks',
   devicePreview: 'mobile',
   canvasZoom: 100,
   isDragging: false,
@@ -71,6 +75,11 @@ export const uiSlice = createSlice({
 
     setRightSidebarWidth: (state, action: PayloadAction<number>) => {
       state.rightSidebarWidth = Math.max(250, Math.min(450, action.payload))
+    },
+
+    // Left sidebar tab
+    setLeftSidebarTab: (state, action: PayloadAction<LeftSidebarTab>) => {
+      state.leftSidebarTab = action.payload
     },
 
     // Device preview
@@ -174,6 +183,7 @@ export const {
   setRightSidebarOpen,
   setLeftSidebarWidth,
   setRightSidebarWidth,
+  setLeftSidebarTab,
   setDevicePreview,
   setCanvasZoom,
   zoomIn,

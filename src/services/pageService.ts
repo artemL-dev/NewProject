@@ -9,6 +9,7 @@ export interface CreatePageInput {
   settings?: Partial<PageSettings>
   metadata?: Partial<PageMetadata>
   projectId?: string | null
+  teamId?: string | null
 }
 
 export interface UpdatePageInput {
@@ -59,6 +60,7 @@ function transformDbToPage(record: any): Page {
     isPublished: record.is_published,
     publishedAt: record.published_at,
     projectId: record.project_id || null,
+    teamId: record.team_id || null,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
   }
@@ -125,6 +127,7 @@ export const pageService = {
       metadata: { ...defaultMetadata, title: input.name, ...input.metadata },
       is_published: false,
       project_id: input.projectId || null,
+      team_id: input.teamId || null,
     }
 
     const { data, error } = await supabase
@@ -209,6 +212,19 @@ export const pageService = {
       settings: page.settings,
       metadata: page.metadata,
       projectId: page.projectId,
+      teamId: page.teamId,
     })
+  },
+
+  async getTeamPages(teamId: string): Promise<Page[]> {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('pages')
+      .select('*')
+      .eq('team_id', teamId)
+      .order('updated_at', { ascending: false })
+
+    if (error) throw error
+    return (data || []).map(transformDbToPage)
   },
 }

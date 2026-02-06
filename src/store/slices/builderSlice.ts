@@ -6,6 +6,7 @@ export interface BuilderState {
   // Current page
   currentPage: Page | null
   pageType: PageType | null
+  projectId: string | null
 
   // Blocks
   blocks: Block[]
@@ -47,6 +48,7 @@ const defaultMetadata: PageMetadata = {
 const initialState: BuilderState = {
   currentPage: null,
   pageType: null,
+  projectId: null,
   blocks: [],
   selectedBlockId: null,
   hoveredBlockId: null,
@@ -69,6 +71,7 @@ export const builderSlice = createSlice({
       state.currentPage = action.payload
       if (action.payload) {
         state.pageType = action.payload.type
+        state.projectId = action.payload.projectId || null
         state.blocks = action.payload.blocks
         state.pageSettings = action.payload.settings
         state.pageMetadata = action.payload.metadata
@@ -187,6 +190,12 @@ export const builderSlice = createSlice({
       }
     },
 
+    // Project
+    setProjectId: (state, action: PayloadAction<string | null>) => {
+      state.projectId = action.payload
+      state.isDirty = true
+    },
+
     // Settings
     updatePageSettings: (state, action: PayloadAction<Partial<PageSettings>>) => {
       state.pageSettings = { ...state.pageSettings, ...action.payload }
@@ -224,9 +233,10 @@ export const builderSlice = createSlice({
     resetBuilder: () => initialState,
 
     // Initialize new page
-    initNewPage: (state, action: PayloadAction<PageType>) => {
+    initNewPage: (state, action: PayloadAction<{ type: PageType; projectId?: string | null }>) => {
       state.currentPage = null
-      state.pageType = action.payload
+      state.pageType = action.payload.type
+      state.projectId = action.payload.projectId || null
       state.blocks = []
       state.selectedBlockId = null
       state.hoveredBlockId = null
@@ -253,6 +263,7 @@ export const {
   copyBlock,
   cutBlock,
   pasteBlock,
+  setProjectId,
   updatePageSettings,
   updatePageMetadata,
   setIsDirty,

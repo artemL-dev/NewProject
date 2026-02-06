@@ -58,25 +58,4 @@ export const generationService = {
     })
   },
 
-  async getGenerationHistory(): Promise<any[]> {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('generation_history')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50)
-
-    if (error) throw error
-    return data || []
-  },
-
-  async getGenerationCount(): Promise<number> {
-    const supabase = createClient()
-    const { count, error } = await supabase
-      .from('generation_history')
-      .select('*', { count: 'exact', head: true })
-
-    if (error) throw error
-    return count || 0
-  },
 }

@@ -51,6 +51,7 @@ export default function EditBuilderPage() {
         metadata: record.metadata,
         isPublished: record.is_published,
         publishedAt: record.published_at,
+        projectId: record.project_id || null,
         createdAt: record.created_at,
         updatedAt: record.updated_at,
       }

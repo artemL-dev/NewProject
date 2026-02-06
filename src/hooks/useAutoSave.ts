@@ -18,7 +18,7 @@ export function useAutoSave({
   enabled = true,
 }: UseAutoSaveOptions) {
   const dispatch = useAppDispatch()
-  const { blocks, pageSettings, pageMetadata, isDirty } = useAppSelector(
+  const { blocks, pageSettings, pageMetadata, projectId, isDirty } = useAppSelector(
     (state) => state.builder
   )
 
@@ -33,6 +33,7 @@ export function useAutoSave({
         blocks,
         settings: pageSettings,
         metadata: pageMetadata,
+        projectId,
       })
       dispatch(setLastSaved(new Date().toISOString()))
     } catch (err: any) {
@@ -40,7 +41,7 @@ export function useAutoSave({
     } finally {
       dispatch(setIsSaving(false))
     }
-  }, [pageId, blocks, pageSettings, pageMetadata, isDirty, dispatch])
+  }, [pageId, blocks, pageSettings, pageMetadata, projectId, isDirty, dispatch])
 
   // Create debounced save function
   useEffect(() => {
@@ -57,7 +58,7 @@ export function useAutoSave({
     if (enabled && isDirty && saveRef.current) {
       saveRef.current()
     }
-  }, [enabled, isDirty, blocks, pageSettings, pageMetadata])
+  }, [enabled, isDirty, blocks, pageSettings, pageMetadata, projectId])
 
   // Manual save function
   const saveNow = useCallback(() => {

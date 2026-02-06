@@ -22,6 +22,7 @@ export interface Database {
           is_published: boolean
           published_at: string | null
           project_id: string | null
+          team_id: string | null
           created_at: string
           updated_at: string
         }
@@ -37,6 +38,7 @@ export interface Database {
           is_published?: boolean
           published_at?: string | null
           project_id?: string | null
+          team_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -52,6 +54,7 @@ export interface Database {
           is_published?: boolean
           published_at?: string | null
           project_id?: string | null
+          team_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -156,6 +159,7 @@ export interface Database {
           name: string
           description: string | null
           color: string
+          team_id: string | null
           created_at: string
           updated_at: string
         }
@@ -165,6 +169,7 @@ export interface Database {
           name: string
           description?: string | null
           color?: string
+          team_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -174,6 +179,7 @@ export interface Database {
           name?: string
           description?: string | null
           color?: string
+          team_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -245,12 +251,117 @@ export interface Database {
           created_at?: string
         }
       }
+      teams: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          avatar_url: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          avatar_url?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          avatar_url?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      team_members: {
+        Row: {
+          id: string
+          team_id: string
+          user_id: string
+          role: 'owner' | 'admin' | 'editor' | 'viewer'
+          invited_by: string | null
+          invited_at: string
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          user_id: string
+          role: 'owner' | 'admin' | 'editor' | 'viewer'
+          invited_by?: string | null
+          invited_at?: string
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          user_id?: string
+          role?: 'owner' | 'admin' | 'editor' | 'viewer'
+          invited_by?: string | null
+          invited_at?: string
+          joined_at?: string
+        }
+      }
+      team_invitations: {
+        Row: {
+          id: string
+          team_id: string
+          email: string
+          role: 'admin' | 'editor' | 'viewer'
+          invited_by: string | null
+          token: string
+          expires_at: string
+          accepted_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          email: string
+          role: 'admin' | 'editor' | 'viewer'
+          invited_by?: string | null
+          token?: string
+          expires_at?: string
+          accepted_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          email?: string
+          role?: 'admin' | 'editor' | 'viewer'
+          invited_by?: string | null
+          token?: string
+          expires_at?: string
+          accepted_at?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_team_members_with_email: {
+        Args: { p_team_id: string }
+        Returns: {
+          id: string
+          team_id: string
+          user_id: string
+          role: string
+          invited_by: string | null
+          invited_at: string
+          joined_at: string
+          email: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

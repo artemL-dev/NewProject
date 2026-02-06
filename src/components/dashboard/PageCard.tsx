@@ -14,13 +14,17 @@ import {
   Layout,
   FileText,
   Newspaper,
+  FolderOpen,
+  ChevronRight,
 } from 'lucide-react'
 
 interface PageCardProps {
   page: Page
   project?: Project | null
+  projects?: Project[]
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
+  onMoveToProject?: (pageId: string, projectId: string | null) => void
 }
 
 const typeConfig: Record<string, { icon: typeof Gamepad2; label: string; gradient: string }> = {
@@ -30,8 +34,9 @@ const typeConfig: Record<string, { icon: typeof Gamepad2; label: string; gradien
   general: { icon: Layout, label: 'General', gradient: 'from-emerald-500 to-teal-600' },
 }
 
-export const PageCard: FC<PageCardProps> = ({ page, project, onDelete, onDuplicate }) => {
+export const PageCard: FC<PageCardProps> = ({ page, project, projects = [], onDelete, onDuplicate, onMoveToProject }) => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [projectSubmenu, setProjectSubmenu] = useState(false)
   const config = typeConfig[page.type] || typeConfig.general
   const Icon = config.icon
 
@@ -116,6 +121,61 @@ export const PageCard: FC<PageCardProps> = ({ page, project, onDelete, onDuplica
                     <Copy size={14} />
                     Duplicate
                   </button>
+                  {/* Move to Project */}
+                  {onMoveToProject && (
+                    <div
+                      className="relative"
+                      onMouseEnter={() => setProjectSubmenu(true)}
+                      onMouseLeave={() => setProjectSubmenu(false)}
+                    >
+                      <button
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 justify-between"
+                      >
+                        <span className="flex items-center gap-2">
+                          <FolderOpen size={14} />
+                          Project
+                        </span>
+                        <ChevronRight size={12} />
+                      </button>
+
+                      {projectSubmenu && (
+                        <div className="absolute left-full top-0 ml-1 w-44 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-30">
+                          <button
+                            onClick={() => {
+                              onMoveToProject(page.id, null)
+                              setMenuOpen(false)
+                              setProjectSubmenu(false)
+                            }}
+                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
+                              !page.projectId ? 'text-indigo-600 font-medium' : 'text-gray-500'
+                            }`}
+                          >
+                            No Project
+                          </button>
+                          {projects.map((p) => (
+                            <button
+                              key={p.id}
+                              onClick={() => {
+                                onMoveToProject(page.id, p.id)
+                                setMenuOpen(false)
+                                setProjectSubmenu(false)
+                              }}
+                              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
+                                page.projectId === p.id ? 'text-indigo-600 font-medium' : 'text-gray-700'
+                              }`}
+                            >
+                              <div
+                                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: p.color }}
+                              />
+                              <span className="truncate">{p.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     onClick={() => {
                       if (confirm('Are you sure you want to delete this page?')) {

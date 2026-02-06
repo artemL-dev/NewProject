@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { projectService, type Project, type CreateProjectInput } from '@/services/projectService'
 
-export function useProjects() {
+export function useProjects(teamId?: string | null) {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -11,7 +11,9 @@ export function useProjects() {
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await projectService.getProjects()
+      const data = teamId
+        ? await projectService.getTeamProjects(teamId)
+        : await projectService.getProjects()
       setProjects(data)
       setError(null)
     } catch (err) {
@@ -19,7 +21,7 @@ export function useProjects() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [teamId])
 
   useEffect(() => {
     fetchProjects()

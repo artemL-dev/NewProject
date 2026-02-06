@@ -3,6 +3,17 @@
 -- =============================================
 -- Run this SQL in your Supabase SQL Editor
 
+-- Projects table (bundles) — must be before pages due to FK reference
+CREATE TABLE IF NOT EXISTS projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  color VARCHAR(7) DEFAULT '#6366f1',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Pages table
 CREATE TABLE IF NOT EXISTS pages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -16,17 +27,6 @@ CREATE TABLE IF NOT EXISTS pages (
   is_published BOOLEAN DEFAULT false,
   published_at TIMESTAMPTZ,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Projects table (bundles)
-CREATE TABLE IF NOT EXISTS projects (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  color VARCHAR(7) DEFAULT '#6366f1',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

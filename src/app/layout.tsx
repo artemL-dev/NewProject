@@ -6,8 +6,8 @@ import { Providers } from '@/store/provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Constructor Landings',
-  description: 'Landing page constructor',
+  title: 'Landify',
+  description: 'Landing page builder',
 }
 
 export default function RootLayout({

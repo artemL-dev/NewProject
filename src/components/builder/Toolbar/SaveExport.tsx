@@ -1,9 +1,11 @@
 'use client'
 
 import { FC, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setIsSaving, setLastSaved, setError, setIsPublishing } from '@/store/slices/builderSlice'
+import { setIsSaving, setLastSaved, setError, setIsPublishing, setCurrentPage } from '@/store/slices/builderSlice'
 import { openModal } from '@/store/slices/uiSlice'
+import { pageService } from '@/services/pageService'
 import { Save, Upload, Download, MoreHorizontal, Loader2 } from 'lucide-react'
 
 interface SaveExportProps {
@@ -11,8 +13,9 @@ interface SaveExportProps {
 }
 
 export const SaveExport: FC<SaveExportProps> = ({ pageId }) => {
+  const router = useRouter()
   const dispatch = useAppDispatch()
-  const { isSaving, isPublishing, isDirty, blocks, pageSettings, pageMetadata } = useAppSelector(
+  const { isSaving, isPublishing, isDirty, blocks, pageSettings, pageMetadata, pageType, projectId } = useAppSelector(
     (state) => state.builder
   )
   const [showMenu, setShowMenu] = useState(false)
@@ -22,10 +25,30 @@ export const SaveExport: FC<SaveExportProps> = ({ pageId }) => {
     dispatch(setIsSaving(true))
 
     try {
-      // This would call the pageService to save
-      // For now, we simulate a save
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      dispatch(setLastSaved(new Date().toISOString()))
+      if (pageId) {
+        // Update existing page
+        await pageService.updatePage(pageId, {
+          blocks,
+          settings: pageSettings,
+          metadata: pageMetadata,
+          projectId,
+        })
+        dispatch(setLastSaved(new Date().toISOString()))
+      } else {
+        // Create new page
+        const newPage = await pageService.createPage({
+          name: pageMetadata.title || 'Untitled',
+          type: pageType || 'general',
+          blocks,
+          settings: pageSettings,
+          metadata: pageMetadata,
+          projectId,
+        })
+        dispatch(setCurrentPage(newPage))
+        dispatch(setLastSaved(new Date().toISOString()))
+        // Redirect to the new page's builder URL
+        router.replace(`/builder/${newPage.id}`)
+      }
     } catch (err: any) {
       dispatch(setError(err.message))
     } finally {
@@ -37,9 +60,33 @@ export const SaveExport: FC<SaveExportProps> = ({ pageId }) => {
     dispatch(setIsPublishing(true))
 
     try {
-      // This would call the pageService to publish
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      dispatch(setLastSaved(new Date().toISOString()))
+      if (pageId) {
+        // Save first, then publish
+        if (isDirty) {
+          await pageService.updatePage(pageId, {
+            blocks,
+            settings: pageSettings,
+            metadata: pageMetadata,
+            projectId,
+          })
+        }
+        await pageService.publishPage(pageId)
+        dispatch(setLastSaved(new Date().toISOString()))
+      } else {
+        // Create and publish
+        const newPage = await pageService.createPage({
+          name: pageMetadata.title || 'Untitled',
+          type: pageType || 'general',
+          blocks,
+          settings: pageSettings,
+          metadata: pageMetadata,
+          projectId,
+        })
+        await pageService.publishPage(newPage.id)
+        dispatch(setCurrentPage(newPage))
+        dispatch(setLastSaved(new Date().toISOString()))
+        router.replace(`/builder/${newPage.id}`)
+      }
     } catch (err: any) {
       dispatch(setError(err.message))
     } finally {

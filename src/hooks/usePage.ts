@@ -42,6 +42,7 @@ export interface UsePagesFilters {
   type?: PageType | 'all'
   projectId?: string | null
   search?: string
+  teamId?: string | null
 }
 
 export function usePages(filters?: UsePagesFilters) {
@@ -49,10 +50,14 @@ export function usePages(filters?: UsePagesFilters) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
+  const teamId = filters?.teamId
+
   const fetchPages = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await pageService.getPages()
+      const data = teamId
+        ? await pageService.getTeamPages(teamId)
+        : await pageService.getPages()
       setPages(data)
       setError(null)
     } catch (err) {
@@ -60,7 +65,7 @@ export function usePages(filters?: UsePagesFilters) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [teamId])
 
   useEffect(() => {
     fetchPages()
@@ -110,6 +115,12 @@ export function usePages(filters?: UsePagesFilters) {
     return newPage
   }, [])
 
+  const updatePageProject = useCallback(async (id: string, projectId: string | null) => {
+    const updated = await pageService.updatePage(id, { projectId })
+    setPages((prev) => prev.map((p) => (p.id === id ? updated : p)))
+    return updated
+  }, [])
+
   return {
     pages: filteredPages,
     allPages: pages,
@@ -119,5 +130,6 @@ export function usePages(filters?: UsePagesFilters) {
     createPage,
     deletePage,
     duplicatePage,
+    updatePageProject,
   }
 }

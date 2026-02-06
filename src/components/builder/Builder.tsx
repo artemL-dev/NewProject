@@ -32,9 +32,10 @@ import type { BlockType } from '@/types/blocks'
 interface BuilderProps {
   page?: Page
   pageType?: PageType
+  projectId?: string | null
 }
 
-export const Builder: FC<BuilderProps> = ({ page, pageType }) => {
+export const Builder: FC<BuilderProps> = ({ page, pageType, projectId }) => {
   const dispatch = useAppDispatch()
   const { blocks } = useAppSelector((state) => state.builder)
 
@@ -50,9 +51,9 @@ export const Builder: FC<BuilderProps> = ({ page, pageType }) => {
     if (page) {
       dispatch(setCurrentPage(page))
     } else if (pageType) {
-      dispatch(initNewPage(pageType))
+      dispatch(initNewPage({ type: pageType, projectId: projectId || null }))
     }
-  }, [page, pageType, dispatch])
+  }, [page, pageType, projectId, dispatch])
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event

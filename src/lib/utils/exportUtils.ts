@@ -49,6 +49,23 @@ export function generatePageHTML(page: Page): string {
   <div class="page-container">
     ${blocks.map(renderBlockHTML).join('\n')}
   </div>
+  ${settings.forwardUtmParams ? `<script>
+  (function(){
+    var params=window.location.search;
+    if(!params)return;
+    var links=document.querySelectorAll('a[href]');
+    for(var i=0;i<links.length;i++){
+      var href=links[i].getAttribute('href');
+      if(!href||href==='#'||href.indexOf('javascript:')===0)continue;
+      try{
+        var u=new URL(href,window.location.origin);
+        var sp=new URLSearchParams(params);
+        sp.forEach(function(v,k){if(!u.searchParams.has(k))u.searchParams.set(k,v);});
+        links[i].setAttribute('href',u.toString());
+      }catch(e){}
+    }
+  })();
+  </script>` : ''}
   ${settings.customJs ? `<script>${settings.customJs}</script>` : ''}
   ${settings.customScripts || ''}
 </body>
@@ -82,6 +99,18 @@ function renderBlockHTML(block: Block): string {
       return renderArticleContentHTML(props)
     case 'article-sidebar':
       return renderArticleSidebarHTML(props)
+    case 'hero-banner':
+      return renderHeroBannerHTML(props)
+    case 'casino-vitrine':
+      return renderCasinoVitrineHTML(props)
+    case 'game-grid':
+      return renderGameGridHTML(props)
+    case 'age-gate':
+      return renderAgeGateHTML(props)
+    case 'advantages-bar':
+      return renderAdvantagesBarHTML(props)
+    case 'top-bar':
+      return renderTopBarHTML(props)
     default:
       return `<!-- Block: ${(block as any).type} -->`
   }
@@ -367,6 +396,185 @@ function renderArticleSidebarHTML(props: any): string {
         ${categories.map((c: any) => `<a href="${escapeHtml(c.url)}" style="padding:4px 10px;background:rgba(0,0,0,0.05);border-radius:9999px;font-size:12px;text-decoration:none;color:inherit;">${escapeHtml(c.name)}</a>`).join('')}
       </div>
     </div>` : ''}
+  </div>`
+}
+
+function renderHeroBannerHTML(props: any): string {
+  const floatingCoinsCSS = props.showFloatingCoins ? `
+  <style>
+    @keyframes float-coin{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100px) rotate(720deg);opacity:0}}
+    .fc{position:absolute;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 0 10px rgba(251,191,36,0.5);}
+  </style>` : ''
+
+  const floatingCoinsHTML = props.showFloatingCoins ? Array.from({ length: 8 }).map((_, i) =>
+    `<div class="fc" style="left:${10 + i * 11}%;animation:float-coin ${4 + (i % 3)}s ease-in-out ${i * 0.5}s infinite;"></div>`
+  ).join('') : ''
+
+  const floatingElsHTML = (props.floatingElements || []).map((el: any) =>
+    `<img src="${escapeHtml(el.imageUrl)}" alt="" style="position:absolute;${el.position === 'left' ? 'left' : 'right'}:5%;bottom:10%;width:${el.size}px;z-index:2;" />`
+  ).join('')
+
+  const clickAttr = props.clickAnywhere ? ` onclick="window.location.href='${escapeHtml(props.ctaUrl)}'" style="cursor:pointer;"` : ''
+
+  return `${floatingCoinsCSS}
+  <div${props.clickAnywhere ? '' : ''} style="position:relative;min-height:${props.minHeight === 'auto' ? 'auto' : props.minHeight};background:${props.backgroundColor};color:${props.textColor};display:flex;align-items:center;justify-content:center;overflow:hidden;${props.clickAnywhere ? 'cursor:pointer;' : ''}"${props.clickAnywhere ? ` onclick="window.location.href='${escapeHtml(props.ctaUrl)}'"` : ''}>
+    ${props.backgroundImageUrl ? `<div style="position:absolute;inset:0;background-image:url(${escapeHtml(props.backgroundImageUrl)});background-size:cover;background-position:center;"></div>` : ''}
+    <div style="position:absolute;inset:0;background:${props.backgroundOverlayColor};opacity:${props.backgroundOverlayOpacity / 100};"></div>
+    ${floatingCoinsHTML}
+    ${floatingElsHTML}
+    <div style="position:relative;z-index:5;text-align:${props.textAlign};padding:60px 24px;max-width:600px;">
+      ${props.logoUrl ? `<div style="margin-bottom:24px;"><img src="${escapeHtml(props.logoUrl)}" alt="Logo" style="width:${props.logoWidth}px;height:auto;display:inline-block;" /></div>` : ''}
+      <h1 style="font-size:32px;font-weight:900;line-height:1.2;margin-bottom:12px;text-shadow:0 2px 8px rgba(0,0,0,0.5);">${escapeHtml(props.headline)}</h1>
+      ${props.subtitle ? `<p style="font-size:18px;opacity:0.9;margin-bottom:32px;text-shadow:0 1px 4px rgba(0,0,0,0.3);">${escapeHtml(props.subtitle)}</p>` : ''}
+      ${props.deviceImageUrl ? `<div style="margin-bottom:24px;"><img src="${escapeHtml(props.deviceImageUrl)}" alt="" style="max-width:280px;height:auto;margin:0 auto;display:block;" /></div>` : ''}
+      <a href="${escapeHtml(props.ctaUrl)}" onclick="event.stopPropagation()" class="cta-btn" style="padding:16px 48px;border-radius:9999px;font-size:18px;background:${props.ctaGradient || props.ctaColor};color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.3);">${escapeHtml(props.ctaText)}</a>
+    </div>
+  </div>`
+}
+
+function renderCasinoVitrineHTML(props: any): string {
+  const items = props.items || []
+  const cardsHTML = items.map((item: any) => {
+    const stars = Array.from({ length: 5 }).map((_, i) =>
+      `<svg width="16" height="16" viewBox="0 0 24 24" fill="${i < item.rating ? props.accentColor : '#d1d5db'}"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
+    ).join('')
+
+    const paymentHTML = (item.paymentIcons || []).length > 0
+      ? `<div style="display:flex;justify-content:center;gap:8px;margin-top:10px;">${item.paymentIcons.map((icon: string) => `<img src="${escapeHtml(icon)}" alt="" style="height:20px;" />`).join('')}</div>`
+      : ''
+
+    return `<div style="background:${props.cardBackgroundColor};border:1px solid ${props.cardBorderColor};border-radius:12px;padding:16px;position:relative;overflow:hidden;">
+      ${item.badge ? `<div style="position:absolute;top:0;right:0;background:${props.badgeColor};color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-bottom-left-radius:8px;text-transform:uppercase;letter-spacing:0.5px;">${escapeHtml(item.badge)}</div>` : ''}
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        ${item.logoUrl
+          ? `<img src="${escapeHtml(item.logoUrl)}" alt="${escapeHtml(item.name)}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;" />`
+          : `<div style="width:60px;height:60px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;">${escapeHtml(item.name.charAt(0))}</div>`
+        }
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:16px;margin-bottom:4px;">${escapeHtml(item.name)}</div>
+          <div style="display:flex;gap:2px;">${stars}</div>
+          ${item.reputationText ? `<div style="font-size:12px;opacity:0.6;margin-top:2px;">${escapeHtml(item.reputationText)}</div>` : ''}
+        </div>
+      </div>
+      <div style="text-align:center;padding:10px;border-radius:8px;background:${props.accentColor}10;margin-bottom:12px;">
+        <div style="font-size:20px;font-weight:800;color:${props.accentColor};">${escapeHtml(item.bonusLine1)}</div>
+        ${item.bonusLine2 ? `<div style="font-size:12px;opacity:0.7;margin-top:2px;">${escapeHtml(item.bonusLine2)}</div>` : ''}
+      </div>
+      <a href="${escapeHtml(item.ctaUrl)}" class="cta-btn" style="display:block;text-align:center;padding:12px;border-radius:8px;background:${props.ctaColor};color:${props.ctaTextColor};font-weight:700;font-size:16px;">${escapeHtml(item.ctaText)}</a>
+      ${paymentHTML}
+    </div>`
+  }).join('')
+
+  return `<div style="background:${props.backgroundColor};color:${props.textColor};padding:24px 16px;">
+    <div style="text-align:center;margin-bottom:8px;">
+      <h2 style="font-size:22px;font-weight:700;">${escapeHtml(props.title)}</h2>
+      ${props.updatedDate ? `<p style="font-size:13px;opacity:0.6;margin-top:4px;">Updated: ${escapeHtml(props.updatedDate)}</p>` : ''}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+      ${cardsHTML}
+    </div>
+  </div>`
+}
+
+function renderGameGridHTML(props: any): string {
+  const games = props.games || []
+  const cols = props.columns || 3
+
+  const centerBlock = props.showCenterBlock ? `
+    <a href="${escapeHtml(props.ctaUrl)}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px;border-radius:12px;background:linear-gradient(135deg,${props.accentColor},${props.ctaColor});text-decoration:none;color:#fff;text-align:center;">
+      <div style="font-size:14px;font-weight:900;margin-bottom:4px;">${escapeHtml(props.centerTitle)}</div>
+      <div style="font-size:10px;opacity:0.9;margin-bottom:8px;">${escapeHtml(props.centerSubtitle)}</div>
+      <div style="padding:6px 16px;background:rgba(255,255,255,0.2);border-radius:9999px;font-size:11px;font-weight:700;">${escapeHtml(props.ctaText)}</div>
+    </a>` : ''
+
+  const centerIndex = Math.floor(games.length / 2)
+  let cells = ''
+  games.forEach((game: any, i: number) => {
+    if (props.showCenterBlock && i === centerIndex) {
+      cells += centerBlock
+    }
+    cells += `<a href="${escapeHtml(game.url)}" style="display:block;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:1;text-decoration:none;">
+      ${game.imageUrl
+        ? `<img src="${escapeHtml(game.imageUrl)}" alt="${escapeHtml(game.title)}" style="width:100%;height:100%;object-fit:cover;" />`
+        : `<div style="width:100%;height:100%;background:linear-gradient(135deg,${props.accentColor}40,${props.backgroundColor});display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:${props.textColor};padding:8px;text-align:center;">${escapeHtml(game.title)}</div>`
+      }
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:6px;background:linear-gradient(transparent,rgba(0,0,0,0.8));font-size:11px;font-weight:600;color:#fff;text-align:center;">${escapeHtml(game.title)}</div>
+    </a>`
+  })
+
+  return `<div style="background:${props.backgroundColor};color:${props.textColor};padding:24px 16px;position:relative;">
+    ${props.backgroundImageUrl ? `<div style="position:absolute;inset:0;background-image:url(${escapeHtml(props.backgroundImageUrl)});background-size:cover;background-position:center;opacity:0.3;"></div>` : ''}
+    <div style="position:relative;display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px;">
+      ${cells}
+    </div>
+    <div style="text-align:center;margin-top:16px;position:relative;">
+      <a href="${escapeHtml(props.ctaUrl)}" class="cta-btn" style="padding:14px 48px;border-radius:9999px;background:${props.ctaColor};color:#fff;font-weight:700;font-size:16px;">${escapeHtml(props.ctaText)}</a>
+    </div>
+  </div>`
+}
+
+function renderAgeGateHTML(props: any): string {
+  const gateId = 'gate_' + Math.random().toString(36).substr(2, 9)
+  return `<div id="${gateId}" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:${props.overlayColor}${Math.round(props.overlayOpacity * 2.55).toString(16).padStart(2, '0')};">
+    <div style="background:${props.modalBackgroundColor};color:${props.textColor};border-radius:20px;padding:48px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+      <div style="width:80px;height:80px;border-radius:50%;border:3px solid ${props.accentColor};display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:32px;font-weight:900;color:${props.accentColor};">${escapeHtml(props.title)}</div>
+      <p style="font-size:15px;line-height:1.6;opacity:0.85;margin-bottom:32px;">${escapeHtml(props.message)}</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <a href="${escapeHtml(props.confirmUrl)}" onclick="document.getElementById('${gateId}').style.display='none';return ${props.confirmUrl === '#' ? 'false' : 'true'};" style="display:block;padding:14px 24px;border-radius:12px;background:${props.confirmButtonColor};color:#fff;font-weight:700;font-size:16px;text-decoration:none;">${escapeHtml(props.confirmText)}</a>
+        <a href="${escapeHtml(props.declineUrl)}" style="display:block;padding:14px 24px;border-radius:12px;background:${props.declineButtonColor};color:#fff;font-weight:600;font-size:14px;text-decoration:none;opacity:0.8;">${escapeHtml(props.declineText)}</a>
+      </div>
+    </div>
+  </div>`
+}
+
+function renderAdvantagesBarHTML(props: any): string {
+  const items = props.items || []
+  const defaultIconSvg = (color: string) => `<svg width="${props.iconSize}" height="${props.iconSize}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+
+  const itemsHTML = items.map((item: any) => {
+    const icon = item.iconUrl
+      ? `<img src="${escapeHtml(item.iconUrl)}" alt="" style="width:${props.iconSize}px;height:${props.iconSize}px;" />`
+      : defaultIconSvg(props.textColor)
+    return `<div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">${icon}<span style="font-size:14px;font-weight:600;">${escapeHtml(item.text)}</span></div>`
+  }).join('')
+
+  if (props.marqueeOnMobile) {
+    const doubled = items.concat(items).map((item: any) => {
+      const icon = item.iconUrl
+        ? `<img src="${escapeHtml(item.iconUrl)}" alt="" style="width:${props.iconSize}px;height:${props.iconSize}px;" />`
+        : defaultIconSvg(props.textColor)
+      return `<div style="display:flex;align-items:center;gap:10px;white-space:nowrap;margin-right:${props.gap}px;">${icon}<span style="font-size:14px;font-weight:600;">${escapeHtml(item.text)}</span></div>`
+    }).join('')
+
+    return `<style>
+      @keyframes adv-marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+      .adv-scroll{display:flex;animation:adv-marquee 20s linear infinite;width:max-content;}
+      @media(min-width:768px){.adv-scroll{animation:none;justify-content:center;width:100%;flex-wrap:wrap;}}
+    </style>
+    <div style="background:${props.backgroundColor};color:${props.textColor};overflow:hidden;">
+      <div class="adv-scroll" style="padding:14px 0;">${doubled}</div>
+    </div>`
+  }
+
+  return `<div style="background:${props.backgroundColor};color:${props.textColor};overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:${props.gap}px;flex-wrap:wrap;padding:14px 16px;">
+      ${itemsHTML}
+    </div>
+  </div>`
+}
+
+function renderTopBarHTML(props: any): string {
+  const badges = props.badges || []
+  const badgesHTML = badges.map((badge: any) => {
+    const icon = badge.iconUrl
+      ? `<img src="${escapeHtml(badge.iconUrl)}" alt="" style="width:16px;height:16px;" />`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="${props.badgeColor}"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
+    return `<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9999px;background:rgba(255,255,255,0.6);font-size:12px;font-weight:600;color:${props.badgeColor};">${icon}${escapeHtml(badge.text)}</div>`
+  }).join('')
+
+  return `<div style="background:${props.backgroundGradient || props.backgroundColor};padding:20px 16px;">
+    <h1 style="font-size:20px;font-weight:800;color:${props.headlineColor};text-align:center;margin-bottom:14px;line-height:1.3;">${escapeHtml(props.headline)}</h1>
+    ${badges.length > 0 ? `<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:12px;">${badgesHTML}</div>` : ''}
   </div>`
 }
 
