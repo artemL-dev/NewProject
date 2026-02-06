@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar styles */
+.overflow-auto::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-track,
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb,
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover,
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Prose styles for rich text */
+.prose {
+  max-width: none;
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+}
+
+.prose h1 { font-size: 2em; }
+.prose h2 { font-size: 1.5em; }
+.prose h3 { font-size: 1.25em; }
+.prose h4 { font-size: 1.1em; }
+
+.prose ul, .prose ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose a {
+  color: #6366f1;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  text-decoration: none;
+}
